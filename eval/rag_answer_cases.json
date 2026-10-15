@@ -1,0 +1,66 @@
+[
+  {
+    "id": "uk_final_sale_answer",
+    "question": "Can I return an item marked as final sale?",
+    "region": "UK",
+    "expected_abstain": false,
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Final Sale Items",
+    "required_terms": [
+      "final sale"
+    ]
+  },
+  {
+    "id": "uk_return_window_answer",
+    "question": "How long do I have to return an item?",
+    "region": "UK",
+    "expected_abstain": false,
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Standard Return Window",
+    "required_terms": [
+      "30"
+    ]
+  },
+  {
+    "id": "uk_refund_answer",
+    "question": "How is my refund processed after a return?",
+    "region": "UK",
+    "expected_abstain": false,
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Refund Processing",
+    "required_terms": [
+      "refund"
+    ]
+  },
+  {
+    "id": "returned_condition_answer",
+    "question": "Can I return a product that shows signs of wear or washing?",
+    "region": "UK",
+    "expected_abstain": false,
+    "expected_source": "product_care.md",
+    "expected_heading": "Returned Products",
+    "required_terms": [
+      "wear",
+      "washing",
+      "unused"
+    ]
+  },
+  {
+    "id": "unsupported_delivery",
+    "question": "Do you offer next-day delivery to Scotland?",
+    "region": "UK",
+    "expected_abstain": true
+  },
+  {
+    "id": "unsupported_payment",
+    "question": "What payment methods do you accept?",
+    "region": "UK",
+    "expected_abstain": true
+  },
+  {
+    "id": "unsupported_store_hours",
+    "question": "What time does your store close today?",
+    "region": "UK",
+    "expected_abstain": true
+  }
+]

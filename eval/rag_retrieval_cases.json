@@ -1,0 +1,79 @@
+[
+  {
+    "id": "uk_return_window",
+    "query": "How many days do I have to return an item?",
+    "region": "UK",
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Standard Return Window"
+  },
+  {
+    "id": "uk_final_sale",
+    "query": "Can I return an item marked as final sale?",
+    "region": "UK",
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Final Sale Items"
+  },
+  {
+    "id": "uk_faulty_item",
+    "query": "What happens if my item arrived damaged or faulty?",
+    "region": "UK",
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Damaged or Faulty Items"
+  },
+  {
+    "id": "uk_refund_processing",
+    "query": "How is my refund processed after a return?",
+    "region": "UK",
+    "expected_source": "uk_returns.md",
+    "expected_heading": "Refund Processing"
+  },
+  {
+    "id": "eu_return_window",
+    "query": "What is the standard return period for an EU order?",
+    "region": "EU",
+    "expected_source": "eu_returns.md",
+    "expected_heading": "Standard Return Window"
+  },
+  {
+    "id": "eu_final_sale",
+    "query": "Are final sale products returnable in the EU?",
+    "region": "EU",
+    "expected_source": "eu_returns.md",
+    "expected_heading": "Final Sale Items"
+  },
+  {
+    "id": "eu_faulty_item",
+    "query": "My EU order arrived faulty. What can I do?",
+    "region": "EU",
+    "expected_source": "eu_returns.md",
+    "expected_heading": "Damaged Products"
+  },
+  {
+    "id": "eu_refund_processing",
+    "query": "How will my refund be processed for my EU return?",
+    "region": "EU",
+    "expected_source": "eu_returns.md",
+    "expected_heading": "Refund Processing"
+  },
+  {
+    "id": "returned_product_condition",
+    "query": "Can I return a product that has signs of wear or washing?",
+    "region": "UK",
+    "expected_source": "product_care.md",
+    "expected_heading": "Returned Products"
+  },
+  {
+    "id": "linen_care",
+    "query": "How should I take care of a linen product?",
+    "region": "UK",
+    "expected_source": "product_care.md",
+    "expected_heading": "Linen Products"
+  },
+  {
+    "id": "denim_care",
+    "query": "What are the care instructions for denim?",
+    "region": "UK",
+    "expected_source": "product_care.md",
+    "expected_heading": "Denim Products"
+  }
+]

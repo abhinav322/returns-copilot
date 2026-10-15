@@ -1,0 +1,52 @@
+[
+  {
+    "id": "next_day_delivery",
+    "query": "Do you offer next-day delivery to Scotland?",
+    "region": "UK"
+  },
+  {
+    "id": "change_shipping_address",
+    "query": "Can I change my shipping address after placing an order?",
+    "region": "UK"
+  },
+  {
+    "id": "payment_methods",
+    "query": "What payment methods do you accept?",
+    "region": "UK"
+  },
+  {
+    "id": "loyalty_programme",
+    "query": "Do you have a loyalty points programme?",
+    "region": "UK"
+  },
+  {
+    "id": "product_recommendation",
+    "query": "Can you recommend an outfit for a wedding?",
+    "region": "UK"
+  },
+  {
+    "id": "cancel_before_shipping",
+    "query": "Can I cancel my order before it ships?",
+    "region": "UK"
+  },
+  {
+    "id": "gift_cards",
+    "query": "Do you sell gift cards?",
+    "region": "UK"
+  },
+  {
+    "id": "store_hours",
+    "query": "What time does your store close today?",
+    "region": "UK"
+  },
+  {
+    "id": "eu_express_shipping",
+    "query": "How much does express shipping to France cost?",
+    "region": "EU"
+  },
+  {
+    "id": "change_size_before_shipping",
+    "query": "Can I change the size before my EU order ships?",
+    "region": "EU"
+  }
+]

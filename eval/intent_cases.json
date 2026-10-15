@@ -1,0 +1,107 @@
+[
+  {
+    "id": "return_01",
+    "question": "Can I return this order?",
+    "expected": "RETURN"
+  },
+  {
+    "id": "return_02",
+    "question": "Am I eligible for a refund?",
+    "expected": "RETURN"
+  },
+  {
+    "id": "return_03",
+    "question": "I want to exchange this jacket.",
+    "expected": "RETURN"
+  },
+  {
+    "id": "return_04",
+    "question": "Can I send this product back?",
+    "expected": "RETURN"
+  },
+  {
+    "id": "return_05",
+    "question": "The shirt does not fit. Can I return it?",
+    "expected": "RETURN"
+  },
+  {
+    "id": "return_06",
+    "question": "Is this final sale item refundable?",
+    "expected": "RETURN"
+  },
+  {
+    "id": "return_07",
+    "question": "I wore the item once. Can I still get a refund?",
+    "expected": "RETURN"
+  },
+  {
+    "id": "wismo_01",
+    "question": "Where is my order?",
+    "expected": "WISMO"
+  },
+  {
+    "id": "wismo_02",
+    "question": "Can you track my package?",
+    "expected": "WISMO"
+  },
+  {
+    "id": "wismo_03",
+    "question": "My delivery is late.",
+    "expected": "WISMO"
+  },
+  {
+    "id": "wismo_04",
+    "question": "When will my parcel arrive?",
+    "expected": "WISMO"
+  },
+  {
+    "id": "wismo_05",
+    "question": "Has my order been shipped yet?",
+    "expected": "WISMO"
+  },
+  {
+    "id": "wismo_06",
+    "question": "What is the current shipment status?",
+    "expected": "WISMO"
+  },
+  {
+    "id": "wismo_07",
+    "question": "Why has my package not arrived?",
+    "expected": "WISMO"
+  },
+  {
+    "id": "unknown_01",
+    "question": "Can you recommend a shirt for me?",
+    "expected": "UNKNOWN"
+  },
+  {
+    "id": "unknown_02",
+    "question": "What payment methods do you accept?",
+    "expected": "UNKNOWN"
+  },
+  {
+    "id": "unknown_03",
+    "question": "Do you sell gift cards?",
+    "expected": "UNKNOWN"
+  },
+  {
+    "id": "unknown_04",
+    "question": "What time does your store close?",
+    "expected": "UNKNOWN"
+  },
+  {
+    "id": "unknown_05",
+    "question": "Do you have any discount codes?",
+    "expected": "UNKNOWN"
+  },
+  {
+    "id": "unknown_06",
+    "question": "Which colour would look best on me?",
+    "expected": "UNKNOWN"
+  },
+  {
+    "id": "unknown_07",
+    "question": "How do I change my account password?",
+    "expected": "UNKNOWN"
+  }
+]
