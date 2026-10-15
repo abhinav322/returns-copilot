@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+
+  frontend:
+    name: Frontend lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      DATABASE_URL: mysql+pymysql://returns_user:returns_password@127.0.0.1:3307/returns_db
+
+      VECTOR_DATABASE_URL: postgresql+psycopg://returns_vector_user:returns_vector_password@127.0.0.1:5433/returns_vector_db
+
+      CHECKPOINT_DATABASE_URL: postgresql://returns_vector_user:returns_vector_password@127.0.0.1:5433/returns_vector_db
+
+      COURIER_API_BASE_URL: http://127.0.0.1:8001
+
+      RAG_RELEVANCE_THRESHOLD: "0.50"
+      HUMAN_REVIEW_THRESHOLD: "0.70"
+
+      LOG_LEVEL: INFO
+      SQL_ECHO: "false"
+
+      FRONTEND_ORIGIN: http://localhost:5173
+
+    services:
+
+      mysql:
+        image: mysql:8.4
+
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: returns_db
+          MYSQL_USER: returns_user
+          MYSQL_PASSWORD: returns_password
+
+        ports:
+          - 3307:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -prootpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+
+      postgres:
+        image: pgvector/pgvector:pg16
+
+        env:
+          POSTGRES_DB: returns_vector_db
+          POSTGRES_USER: returns_vector_user
+          POSTGRES_PASSWORD: returns_vector_password
+
+        ports:
+          - 5433:5432
+
+        options: >-
+          --health-cmd="pg_isready -U returns_vector_user -d returns_vector_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Create MySQL tables
+        run: python -m backend.create_tables
+
+      - name: Seed test orders
+        run: python -m backend.seed_data
+
+      - name: Prepare LangGraph checkpoints
+        run: python -m backend.workflow.setup_checkpoints
+
+      - name: Run backend tests
+        run: python -m pytest -q
