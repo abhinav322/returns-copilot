@@ -1,18 +1,52 @@
 # Returns Copilot
 
-A local-first AI customer support application that routes customer requests across return eligibility, shipment tracking, and unsupported queries.
+**Local-first GenAI customer support copilot with RAG, LangGraph, human-in-the-loop review, pgvector, FastAPI, Ollama, and React.**
 
-The project combines deterministic business rules, Retrieval-Augmented Generation (RAG), LangGraph workflows, human-in-the-loop review, PostgreSQL checkpointing, REST API integration, structured logging, and a React frontend.
+**CI status:** passing on `main` with automated frontend lint/build and backend tests.
 
-The system is designed so that the LLM explains business decisions rather than making high-risk decisions itself.
+A customer-support application that routes customer requests across return eligibility, shipment tracking, and unsupported queries.
+
+The system combines deterministic business rules, Retrieval-Augmented Generation (RAG), LangGraph workflows, human-in-the-loop review, PostgreSQL checkpointing, REST API integration, structured logging, automated evaluation, and a React frontend.
+
+A core design principle is that the LLM explains business decisions rather than making high-risk decisions itself.
+
+---
+
+## Demo
+
+### Return workflow with human review
+
+The return workflow evaluates structured order data first, retrieves supporting policy evidence, generates a draft response, validates that response against known order facts, and pauses for human review when confidence or validation checks require it.
+
+![Return workflow result](docs/images/return-result.png)
+
+The reviewer can reject the response, approve it unchanged, or edit it before approval.
+
+![Human review controls](docs/images/return-review.png)
+
+The UI also exposes the deterministic decision, validation issues, retrieval confidence, and supporting policy sources.
+
+![Return validation and policy sources](docs/images/return-validation.png)
+
+### Shipment tracking workflow
+
+Shipment questions are routed separately to the WISMO workflow.
+
+The assistant calls the courier service and returns a customer-facing update.
+
+![Shipment assistant response](docs/images/shipment-result.png)
+
+Structured shipment information remains visible alongside the generated response.
+
+![Shipment tracking details](docs/images/shipment-details.png)
 
 ---
 
 ## What the system does
 
-The assistant currently supports three request types:
+The assistant currently supports three request types.
 
-### 1. Return requests
+### Return requests
 
 For return-related questions, the system:
 
@@ -24,7 +58,7 @@ For return-related questions, the system:
 6. Routes low-confidence or problematic responses to human review.
 7. Persists interrupted workflows using PostgreSQL-backed LangGraph checkpoints.
 
-### 2. Shipment tracking
+### Shipment tracking
 
 For "Where is my order?" requests, the system:
 
@@ -33,9 +67,9 @@ For "Where is my order?" requests, the system:
 3. Handles transient failures with retry logic.
 4. Produces a customer-facing shipment update.
 
-If the courier service is unavailable, the application returns a deterministic fallback rather than failing the entire request.
+If the courier service is unavailable, the application returns a controlled deterministic fallback rather than failing the entire request.
 
-### 3. Unsupported requests
+### Unsupported requests
 
 Questions outside the supported return and shipment domains are routed to a deterministic fallback response rather than being passed freely to the LLM.
 
@@ -84,15 +118,9 @@ flowchart TD
 
 The LLM does not decide whether an order is eligible for return.
 
-Return eligibility is calculated using application business logic based on structured fields such as:
-
-- delivery date
-- item condition
-- final-sale status
+Return eligibility is calculated using application business logic based on structured fields such as delivery date, item condition, and final-sale status.
 
 The LLM receives the resulting decision and explains it to the customer.
-
-This separates:
 
 ```text
 Business decision
@@ -106,19 +134,26 @@ LLM + retrieved evidence
 
 ### RAG as supporting evidence
 
-Policy retrieval is used to support and cite the explanation.
+Policy retrieval supports and cites the explanation.
 
-Retrieved policy text does not establish order-specific facts. Structured order data remains the source of truth for facts such as whether an item is final sale or whether it was used.
+Retrieved policy text does not establish order-specific facts.
+
+Structured order data remains the source of truth for facts such as:
+
+```text
+final-sale status
+item condition
+delivery date
+return eligibility result
+```
+
+This prevents a retrieved policy section from being treated as evidence that a specific order has that property.
 
 ### Human-in-the-loop review
 
-Responses can be paused when confidence is below the configured human-review threshold or when answer validation detects a problem.
+Responses can be paused when retrieval confidence is below the configured human-review threshold or answer validation detects a problem.
 
-A reviewer can:
-
-- approve the generated draft
-- edit and approve the draft
-- reject the response
+A reviewer can approve the generated draft, edit and approve it, or reject the response.
 
 LangGraph checkpointing allows the workflow to pause and later resume using the same thread ID.
 
@@ -134,40 +169,49 @@ For example, if the courier API is unavailable, the shipment workflow returns a 
 
 ### Backend
 
-- Python
-- FastAPI
-- LangGraph
-- SQLAlchemy
-- MySQL
-- PostgreSQL
-- pgvector
-- psycopg
-- PyMySQL
-- HTTPX
-- pytest
+```text
+Python
+FastAPI
+LangGraph
+SQLAlchemy
+MySQL
+PostgreSQL
+pgvector
+psycopg
+PyMySQL
+HTTPX
+pytest
+```
 
-### AI / Retrieval
+### AI and retrieval
 
-- Ollama
-- Qwen3 4B Instruct
-- Sentence Transformers
-- `all-MiniLM-L6-v2`
-- semantic vector retrieval
-- BM25 experimentation
-- cross-encoder reranking experimentation
+```text
+Ollama
+Qwen3 4B Instruct
+Sentence Transformers
+all-MiniLM-L6-v2
+semantic vector retrieval
+BM25 experimentation
+cross-encoder reranking experimentation
+```
 
 ### Frontend
 
-- React
-- Vite
-- JavaScript
-- CSS
+```text
+React
+Vite
+JavaScript
+CSS
+```
 
 ### Infrastructure
 
-- Docker Compose
-- MySQL 8.4
-- PostgreSQL 16 with pgvector
+```text
+Docker Compose
+MySQL 8.4
+PostgreSQL 16 + pgvector
+GitHub Actions
+```
 
 ---
 
@@ -175,6 +219,10 @@ For example, if the courier API is unavailable, the shipment workflow returns a 
 
 ```text
 returns-copilot/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 │
 ├── backend/
 │   ├── app.py
@@ -207,6 +255,14 @@ returns-copilot/
 │       ├── eu_returns.md
 │       └── product_care.md
 │
+├── docs/
+│   └── images/
+│       ├── return-result.png
+│       ├── return-review.png
+│       ├── return-validation.png
+│       ├── shipment-result.png
+│       └── shipment-details.png
+│
 ├── eval/
 │   ├── intent_cases.json
 │   ├── rag_answer_cases.json
@@ -229,6 +285,7 @@ returns-copilot/
 │   └── vite.config.js
 │
 ├── tests/
+│   ├── test_answer_validation.py
 │   ├── test_courier_client.py
 │   ├── test_returns_api.py
 │   ├── test_support_api.py
@@ -247,24 +304,14 @@ returns-copilot/
 
 ### Prerequisites
 
-Install:
-
-- Python 3.12+
-- Docker Desktop
-- Ollama
-- Node.js and npm
-- Git
-
----
+Install Python 3.12+, Docker Desktop, Ollama, Node.js, npm, and Git.
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/abhinav322/returns-copilot.git
+git clone <repository-url>
 cd returns-copilot
 ```
-
----
 
 ### 2. Create the Python environment
 
@@ -275,13 +322,11 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-Install the Python dependencies:
+Install dependencies:
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
-
----
 
 ### 3. Configure environment variables
 
@@ -311,8 +356,6 @@ to:
 frontend/.env
 ```
 
----
-
 ### 4. Start MySQL and PostgreSQL
 
 ```powershell
@@ -325,16 +368,12 @@ Verify:
 docker compose ps
 ```
 
----
-
 ### 5. Create and seed the application database
 
 ```powershell
 python -m backend.create_tables
 python -m backend.seed_data
 ```
-
----
 
 ### 6. Prepare the vector database
 
@@ -350,25 +389,21 @@ Ingest the sample policy documents:
 python -m backend.rag.ingest_to_pgvector
 ```
 
----
-
 ### 7. Prepare LangGraph checkpoints
 
 ```powershell
 python -m backend.workflow.setup_checkpoints
 ```
 
----
-
 ### 8. Install the local language model
 
-The project uses Ollama with:
+The project currently uses:
 
 ```text
 qwen3:4b-instruct
 ```
 
-Pull the model:
+Pull it using Ollama:
 
 ```powershell
 ollama pull qwen3:4b-instruct
@@ -390,14 +425,6 @@ From the repository root:
 python -m uvicorn backend.app:app --reload --port 8000
 ```
 
-Main API:
-
-```text
-http://127.0.0.1:8000
-```
-
----
-
 ### Mock courier API
 
 Open another terminal:
@@ -405,14 +432,6 @@ Open another terminal:
 ```powershell
 python -m uvicorn backend.courier_app:app --reload --port 8001
 ```
-
-Courier API:
-
-```text
-http://127.0.0.1:8001
-```
-
----
 
 ### React frontend
 
@@ -424,11 +443,7 @@ npm install
 npm run dev
 ```
 
-Frontend:
-
-```text
-http://localhost:5173
-```
+The frontend runs locally on port `5173`.
 
 ---
 
@@ -441,7 +456,7 @@ Order number: ORD-1001
 Question: Can I return this item?
 ```
 
-The workflow evaluates structured order data, retrieves relevant return policy evidence, validates the generated explanation, and may request human review when confidence is low.
+The workflow evaluates structured order data, retrieves relevant return-policy evidence, validates the generated explanation, and can request human review when confidence is low.
 
 ### Shipment tracking
 
@@ -471,14 +486,9 @@ A return response may enter:
 pending_review
 ```
 
-The frontend displays:
+The frontend exposes the generated draft, deterministic return decision, validation issues, retrieved policy sources, and workflow thread ID.
 
-- the generated draft
-- validation issues
-- retrieved policy sources
-- the workflow thread ID
-
-A reviewer can edit and approve the answer.
+A reviewer can modify the answer before approval.
 
 The workflow then resumes from the PostgreSQL checkpoint instead of restarting from the beginning.
 
@@ -526,10 +536,12 @@ The answer evaluator is heuristic and does not represent full semantic entailmen
 
 The repository also contains experiments with:
 
-- BM25 + semantic hybrid retrieval
-- Reciprocal Rank Fusion
-- cross-encoder reranking
-- relevance-threshold calibration
+```text
+BM25 + semantic hybrid retrieval
+Reciprocal Rank Fusion
+cross-encoder reranking
+relevance-threshold calibration
+```
 
 These experiments were evaluated rather than automatically promoted into the production path.
 
@@ -556,69 +568,47 @@ These thresholds intentionally serve different purposes.
 
 ## Reliability and safety controls
 
-The application includes several safeguards:
+The application includes safeguards for deterministic return eligibility, retrieval relevance filtering, citation validation, order-fact consistency, human review, persistent workflow checkpoints, courier retries, service-failure fallbacks, unsupported intents, sanitized API errors, request tracing, and structured logging.
 
-- deterministic return eligibility
-- retrieval relevance filtering
-- citation validation
-- order-fact consistency checks
-- human review for low-confidence responses
-- persistent workflow checkpoints
-- courier retry handling
-- deterministic service-failure fallbacks
-- unsupported-intent fallback
-- sanitized API error responses
-- request IDs for tracing
-- structured JSON application logging
+The answer validator is deliberately lightweight and rule-based.
 
-The answer validator is deliberately lightweight and rule-based. It is not presented as a complete semantic hallucination detector.
+It is not presented as a complete semantic hallucination detector.
 
 ---
 
 ## Testing
 
-Run the backend test suite from the repository root:
+Run the backend suite from the repository root:
 
 ```powershell
-python -m pytest -v
+python -m pytest -q
 ```
 
 Current project test suite:
 
 ```text
-20 tests passing
+25 tests passing
 ```
 
-Tests cover areas including:
-
-- return APIs
-- support routing
-- courier client behavior
-- support API behavior
+The test suite covers return APIs, support routing, courier behavior, support API behavior, and answer-validation regression cases.
 
 ---
 
-## Frontend quality checks
+## Continuous integration
 
-From:
+GitHub Actions runs automatically on pushes and pull requests targeting `main`.
+
+The frontend CI job performs:
 
 ```text
-frontend/
-```
-
-run:
-
-```powershell
+npm ci
 npm run lint
-```
-
-and:
-
-```powershell
 npm run build
 ```
 
-The current frontend passes both ESLint and the Vite production build.
+The backend CI job creates clean MySQL and PostgreSQL + pgvector service containers, installs the Python dependencies, creates and seeds the application database, prepares LangGraph checkpoints, and runs the pytest suite.
+
+This validates the project in a clean Linux environment rather than relying only on the local development machine.
 
 ---
 
@@ -640,47 +630,85 @@ intent
 workflow_status
 ```
 
-The workflow thread ID and HTTP request ID are intentionally separate:
+The workflow thread ID and HTTP request ID are intentionally separate.
 
-- `request_id` traces an individual HTTP request
-- `thread_id` identifies a persistent LangGraph workflow across multiple HTTP requests
+`request_id` traces an individual HTTP request.
 
-This allows a human-review resume request to have a new request ID while continuing the same workflow thread.
+`thread_id` identifies a persistent LangGraph workflow across multiple HTTP requests.
+
+This allows a human-review resume request to receive a new HTTP request ID while continuing the same workflow thread.
 
 ---
 
-## Important implementation choice
+## Lessons from end-to-end testing
 
-One failure discovered during end-to-end testing involved a retrieved "Final Sale" policy chunk.
+### Retrieved policy text can become a false order fact
 
-The order itself was **not** a final-sale item, but the language model transformed the general policy text into an incorrect order-specific claim.
+During testing, a retrieved `Final Sale Items` policy section caused the LLM to transform a general policy statement into an incorrect order-specific claim.
 
-The system prevented automatic release through human review.
+The order itself was not final sale.
 
-The workflow was then strengthened with two layers of protection:
+Human review prevented the draft from being automatically released.
 
-1. Prompt rules explicitly separate retrieved policy from structured order facts.
-2. Deterministic validation checks generated claims against known order fields.
+The workflow was strengthened with two layers of protection:
 
-This is an example of why RAG alone does not guarantee grounded generation.
+```text
+Prompt constraints
++
+deterministic order-fact validation
+```
+
+This demonstrates why successful retrieval alone does not guarantee grounded generation.
+
+### Safety validators can also create false positives
+
+Later end-to-end testing revealed another failure mode in the validation layer itself.
+
+A generated sentence contained:
+
+```text
+whether it is marked as final sale
+```
+
+The initial regex validator incorrectly interpreted the substring:
+
+```text
+it is marked as final sale
+```
+
+as a factual assertion.
+
+That produced a false-positive validation warning.
+
+A regression test was written before changing the production code. The validator was then updated to distinguish asserted statements from conditional phrases introduced by terms such as `whether` and `if`.
+
+The regression cycle was:
+
+```text
+UI failure discovered
+        ↓
+Regression test written
+        ↓
+Test failed
+        ↓
+Validator fixed
+        ↓
+Regression test passed
+        ↓
+Full 25-test suite passed
+```
+
+This reinforced an important design lesson: safety layers themselves need testing, observability, and evaluation.
 
 ---
 
 ## Current limitations
 
-This project is a local demonstration system rather than a production commerce platform.
+This is a local demonstration system rather than a production commerce platform.
 
-Current limitations include:
+Current limitations include synthetic order data, a mock courier service, no customer authentication or authorization, no customer ownership validation for order numbers, heuristic answer validation rather than semantic entailment, small curated evaluation datasets, and local Ollama inference rather than a horizontally scaled model service.
 
-- synthetic/sample order data
-- mock courier service
-- no customer authentication or authorization
-- no customer ownership validation for order numbers
-- heuristic answer validation rather than full semantic entailment
-- small curated evaluation datasets
-- local Ollama inference rather than a horizontally scaled model service
-
-These limitations are intentionally documented rather than hidden.
+These limitations are documented intentionally rather than hidden.
 
 ---
 
@@ -688,15 +716,17 @@ These limitations are intentionally documented rather than hidden.
 
 Potential extensions include:
 
-- authentication and customer/order authorization
-- semantic/NLI-based answer verification
-- production-grade model serving
-- distributed tracing
-- outbound request-ID propagation
-- larger retrieval and generation evaluation datasets
-- CI/CD validation
-- containerized backend and frontend services
-- cloud deployment
+```text
+authentication and customer/order authorization
+semantic or NLI-based answer verification
+production-grade model serving
+distributed tracing
+outbound request-ID propagation
+larger retrieval and generation evaluation datasets
+containerized backend and frontend services
+cloud deployment
+deployment automation
+```
 
 ---
 
@@ -716,6 +746,8 @@ workflow orchestration
 human oversight
 +
 observable APIs
++
+automated evaluation
 ```
 
 rather than treating an LLM as an unrestricted decision-maker.
