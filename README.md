@@ -1,5 +1,7 @@
 # Returns Copilot
 
+[![CI](https://github.com/abhinav322/returns-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/abhinav322/returns-copilot/actions/workflows/ci.yml)
+
 **Local-first GenAI customer support copilot with RAG, LangGraph, human-in-the-loop review, pgvector, FastAPI, Ollama, and React.**
 
 **CI status:** passing on `main` with automated frontend lint/build and backend tests.
