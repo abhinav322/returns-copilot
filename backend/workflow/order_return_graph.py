@@ -94,6 +94,57 @@ def matches_any_pattern(
     )
 
 
+def matches_asserted_pattern(
+    text: str,
+    patterns: list[str],
+) -> bool:
+    """
+    Return True only when a pattern appears as
+    an asserted statement rather than inside a
+    conditional phrase such as:
+
+    - whether it is ...
+    - whether the item is ...
+    - whether or not it is ...
+    - if it is ...
+
+    This prevents the validator from treating
+    discussion of a possible order property as
+    a factual claim about the order.
+    """
+
+    conditional_prefix = (
+        r"\b(?:"
+        r"whether"
+        r"(?:\s+or\s+not)?"
+        r"|if"
+        r")\s*$"
+    )
+
+    for pattern in patterns:
+
+        for match in re.finditer(
+            pattern,
+            text,
+            flags=re.IGNORECASE,
+        ):
+
+            prefix = text[
+                :match.start()
+            ]
+
+            if re.search(
+                conditional_prefix,
+                prefix,
+                flags=re.IGNORECASE,
+            ):
+                continue
+
+            return True
+
+    return False
+
+
 def claims_order_is_final_sale(
     text: str,
 ) -> bool:
@@ -119,7 +170,7 @@ def claims_order_is_final_sale(
         ),
     ]
 
-    return matches_any_pattern(
+    return matches_asserted_pattern(
         text,
         patterns,
     )
@@ -144,7 +195,7 @@ def claims_order_is_not_final_sale(
         ),
     ]
 
-    return matches_any_pattern(
+    return matches_asserted_pattern(
         text,
         patterns,
     )
@@ -389,6 +440,7 @@ def build_sources(
 
 
 def build_order_return_graph():
+
     def fetch_order(
         state: OrderReturnState,
     ) -> dict:
