@@ -1,9 +1,12 @@
+
+RETURN_WINDOW_DAYS = 30
+
 def check_return_eligibility(
     days_since_delivery: int,
     item_condition: str,
     final_sale: bool
 ):
-    if days_since_delivery > 30:
+    if days_since_delivery > RETURN_WINDOW_DAYS:
         return {
             "eligible": False,
             "reason": "Return window exceeded"

@@ -26,3 +26,6 @@ httpx
 
 # Testing
 pytest==9.1.1
+
+# MCP integration
+mcp==2.3.0

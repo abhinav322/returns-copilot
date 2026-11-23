@@ -449,6 +449,106 @@ The frontend runs locally on port `5173`.
 
 ---
 
+## MCP Integration — Local Qwen AI Agent
+
+Returns Copilot also provides a Model Context Protocol (MCP)
+server, allowing AI clients to discover and execute backend tools.
+
+### Available MCP tools
+
+1. `check_return_eligibility`
+   - Retrieves order information from MySQL.
+   - Applies deterministic return eligibility rules.
+   - Returns the decision, reason and allowed return window.
+
+2. `track_shipment`
+   - Calls the mock courier REST API.
+   - Retrieves tracking status and shipment information.
+   - Handles missing shipments and service failures.
+
+3. `search_policy`
+   - Searches policy documents stored in PostgreSQL + pgvector.
+   - Uses semantic search and BM25 with Reciprocal Rank Fusion.
+   - Returns three relevant policy passages with source metadata.
+
+### Architecture
+
+User question
+    ↓
+Ollama — Qwen3 4B Instruct
+    ↓
+Python MCP client
+    ↓
+MCP server
+    ↓
+MySQL / Courier API / PostgreSQL + pgvector
+    ↓
+Tool results returned to Qwen
+    ↓
+Grounded natural-language response
+
+### Running the MCP client
+
+Complete the main project's database setup first.
+
+Install the additional MCP dependency:
+
+```powershell
+python -m pip install "mcp==2.3.0"
+```
+
+Ensure Docker services and Ollama are running.
+
+Start the mock courier API in a separate terminal:
+
+```powershell
+python -m uvicorn backend.courier_app:app --port 8001
+```
+
+Start the interactive MCP client from the repository root:
+
+```powershell
+python ollama_mcp_client.py
+```
+
+The MCP client automatically starts the MCP server using stdio.
+
+Example questions:
+
+- Can I return order ORD-1001?
+- Where is my shipment for order ORD-2001?
+- What is the standard return window in the UK?
+
+Type `exit` to end the session.
+
+### Reliability improvements
+
+During testing, semantic retrieval ranked the correct UK return
+window passage fourth, causing an incomplete AI response.
+
+The MCP policy tool was updated to use the existing hybrid
+retrieval implementation, moving the relevant passage into the
+top three results for the tested query.
+
+A regression test was added to verify retrieval of the 30-day
+UK return policy.
+
+The MCP integration uses local Ollama inference and does not
+require a paid LLM API.
+
+### Testing
+
+Run the full backend test suite:
+
+```powershell
+python -m pytest -q
+```
+
+Latest local result: 26 tests passed.
+
+The MCP integration is a local demonstration and does not
+include production customer authentication or authorization.
+
 ## Example requests
 
 ### Return eligibility
