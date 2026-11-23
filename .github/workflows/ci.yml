@@ -126,5 +126,11 @@ jobs:
       - name: Prepare LangGraph checkpoints
         run: python -m backend.workflow.setup_checkpoints
 
+      - name: Prepare policy vector database
+        run: |
+          python -c "from sqlalchemy import text; from backend.rag.vector_database import vector_engine; conn = vector_engine.connect(); conn.execute(text('CREATE EXTENSION IF NOT EXISTS vector')); conn.commit(); conn.close()"
+          python -m backend.rag.create_vector_tables
+          python -m backend.rag.ingest_to_pgvector
+
       - name: Run backend tests
         run: python -m pytest -q
